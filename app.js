@@ -6,8 +6,12 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 //引入数据库的配置文件
 var setting = require('./setting');
-//引入数据库操作实例
-var db = require('./model/db');
+//flash插件
+var flash = require('connect-flash');
+//session插件
+var session = require('express-session');
+//session存放数据库的插件
+var MongoStore = require('connect-mongo')(session);
 //添加路由文件
 var routes = require('./routes/index');
 
@@ -26,14 +30,33 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-//将app传递给路由函数使用
+//使用flash
+app.use(flash());
+//使用session
+app.use(session({
+    //加密
+    secret:setting.cookieSecret,
+    //cookie的过期时间
+    cookie:{maxAge:1000*60*60*24*30},
+    //加密
+    key:setting.db,
+    //连接数据库地址
+    store:new MongoStore({
+        url:'mongodb://localhost/myblog'
+    }),
+    //是否强制保存回话
+    resave:false,
+    //会话未修改的时候，是否保存
+    saveUninitialized:true
+}));
+//将app传递给路由函数使用.
 routes(app);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
-  var err = new Error('Not Found');//创建一个错误对象
-  err.status = 404;
-  next(err);
+    var err = new Error('Not Found');//创建一个错误对象
+    err.status = 404;
+    next(err);
 });
 
 // error handler 错误处理
@@ -47,7 +70,7 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 //添加监听
-app.listen(4000,function () {
+app.listen(5000,function () {
     console.log('发射发射!!!')
 })
 module.exports = app;

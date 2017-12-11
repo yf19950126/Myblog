@@ -38,6 +38,7 @@ module.exports = function (app) {
         //3.对密码进行加密
         var md5 = crypto.createHash('md5');
         password = md5.update(req.body.password).digest('hex');
+        //将注册信息传入User对象
         var newUser = new User({
             username: username,
             password: password,
@@ -54,7 +55,7 @@ module.exports = function (app) {
                 return res.redirect('/reg');
             }
 
-            //5.将用户信息存入数据库,并且跳转到首页
+            //5.将用户信息存入数据库,并且跳转到首页(不存在则新增用户)
             newUser.save(function (err, user) {
                 if (err) {
                     req.flash('error', err);
