@@ -33,6 +33,7 @@ module.exports = function (app) {
         if (password != password_repeat) {
             //给出用户提示
             req.flash('error', '两次密码输入不正确');
+            //console.log(req.flash('error').toString())
             return res.redirect('/reg');
         }
         //3.对密码进行加密
